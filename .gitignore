@@ -1,0 +1,24 @@
+# Local state, credentials and generated files
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*token*
+*secret*
+
+# Python / Node generated content
+__pycache__/
+*.py[cod]
+node_modules/
+.npm/
+
+# Local test runs and runtime data
+work/
+evidence/
+output/
+*.log
+*.lock
+*.pid
+
+extension/schemas/gschemas.compiled

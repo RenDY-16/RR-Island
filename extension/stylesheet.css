@@ -1,0 +1,75 @@
+.ci-button, .ci-button:hover, .ci-button:active, .ci-button:checked {
+  background-color: transparent;
+}
+.ci-pill {
+  background-color: #000000;
+  border: 1px solid #292929;
+  border-radius: 18px;
+  padding: 2px 12px;
+  spacing: 8px;
+  margin: 2px 6px;
+  color: #f5f5f5;
+  font-size: 12px;
+  font-weight: 600;
+}
+.ci-detail { color: #bcbcbc; font-weight: 400; }
+.ci-dot { color: #737373; min-width: 18px; }
+.ci-working .ci-dot, .ci-thinking .ci-dot { color: #c8b9ff; }
+.ci-working, .ci-thinking { border-color: #4b3f65; }
+.ci-finished .ci-dot { color: #89e2aa; }
+.ci-error .ci-dot, .ci-stale .ci-dot { color: #ffc17d; }
+.ci-menu {
+  background-color: #090909;
+  border: 1px solid #303030;
+  border-radius: 22px;
+  padding: 10px;
+  min-width: 320px;
+  color: #eeeeee;
+}
+.ci-heading { color: #a49aae; font-size: 10px; font-weight: bold; }
+.ci-session { background-color: #141414; border-radius: 14px; margin: 4px 0; padding: 12px; }
+.ci-project { font-size: 13px; font-weight: bold; }
+.ci-subtitle { color: #999999; font-size: 11px; padding-top: 5px; }
+.ci-character { margin: 0; }
+.ci-header { spacing: 14px; padding: 10px 8px; }
+.ci-title { color: #f5f5f5; font-size: 17px; font-weight: bold; }
+.ci-summary { color: #bebebe; font-size: 11px; }
+.ci-meta { color: #777777; font-size: 10px; padding-top: 5px; }
+.ci-copy { border-radius: 10px; padding: 8px; color: #aaaaaa; }
+.ci-copy:hover, .ci-copy:focus { background-color: #303030; color: #ffffff; }
+.ci-footer { color: #777777; font-size: 10px; }
+.ci-project { color: #eeeeee; }
+.ci-tabs { spacing: 5px; padding: 6px 0; }
+.ci-tab { color: #aaaaaa; padding: 7px 14px; border-radius: 12px; background-color: #151515; }
+.ci-tab:hover, .ci-tab:focus { background-color: #252525; }
+.ci-tab-selected { color: #ffffff; background-color: #30293d; }
+.ci-pane { width: 390px; spacing: 10px; }
+.ci-chat-scroll { background-color: #141414; border: 1px solid #252525; border-radius: 14px; }
+.ci-chat-body { padding: 12px; spacing: 8px; }
+.ci-answer { color: #eeeeee; font-weight: normal; }
+.ci-entry { color: #f5f5f5; background-color: #202020; border: 1px solid #353535; border-radius: 12px; padding: 10px; }
+.ci-entry:focus { border-color: #8c76bb; }
+.ci-controls { spacing: 6px; }
+.ci-action { color: #eeeeee; font-size: 11px; background-color: #242424; border-radius: 10px; padding: 8px 10px; }
+.ci-action:hover, .ci-action:focus { background-color: #3b334b; }
+.ci-old-chat { text-align: left; padding: 12px; }
+.ci-usage-card { background-color: #141414; border-radius: 14px; padding: 14px; margin-bottom: 10px; spacing: 9px; }
+.ci-quota { color: #f5f5f5; font-size: 24px; font-weight: bold; }
+.ci-track { background-color: #303030; border-radius: 3px; }
+.ci-fill { background-color: #bfa6f5; border-radius: 3px; }
+.ci-connection { font-size: 11px; color: #aaa; }
+.ci-connection-ready { color: #9bc7a5; }
+.ci-connection-error { color: #e9b38d; }
+.ci-composer { min-height: 30px; max-height: 64px; }
+.ci-bubble { padding: 10px; spacing: 6px; border-radius: 12px; background-color: #1b1b1b; }
+.ci-bubble-user { background-color: #30283b; margin-left: 14px; }
+.ci-bubble-codex { margin-right: 14px; }
+.ci-bubble-header { spacing: 8px; }
+.ci-bubble-name { font-size: 10px; color: #b5a8c4; }
+.ci-bubble-header .ci-action { font-size: 9px; padding: 3px 7px; }
+.ci-bubble-text { font-weight: normal; color: #eee; }
+.ci-catalog-row { background-color: #1b1b1b; border-radius: 12px; padding: 6px; spacing: 5px; }
+.ci-chat-open { text-align: left; padding: 6px; border-radius: 8px; }
+.ci-chat-open:hover, .ci-chat-open:focus { background-color: #30283b; }
+.ci-pet-button, .ci-pet-button:hover, .ci-pet-button:active { background-color: transparent; border-radius: 16px; }
+.ci-pet-button:focus { box-shadow: inset 0 0 0 1px #726183; }

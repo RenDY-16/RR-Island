@@ -1,0 +1,21 @@
+<schemalist>
+  <schema id="org.gnome.shell.extensions.codex-island" path="/org/gnome/shell/extensions/codex-island/">
+    <key name="position" type="i"><default>1</default><range min="0" max="2"/><summary>Panel position: left, center, right</summary></key>
+    <key name="size" type="i"><default>1</default><range min="0" max="2"/><summary>Compact, normal, large</summary></key>
+    <key name="show-label" type="b"><default>true</default><summary>Show Codex name</summary></key>
+    <key name="show-character" type="b"><default>true</default><summary>Show animated companion</summary></key>
+    <key name="animations" type="b"><default>true</default><summary>Animate the companion and transitions</summary></key>
+    <key name="pet-size" type="i"><default>80</default><range min="64" max="112"/><summary>Pet size in the dropdown</summary></key>
+    <key name="pet-intensity" type="i"><default>1</default><range min="0" max="2"/><summary>Calm, normal, lively pet motion</summary></key>
+    <key name="pinned-chats" type="as"><default>[]</default><summary>Locally pinned chat IDs</summary></key>
+    <key name="hide-idle" type="b"><default>false</default><summary>Hide indicator when idle</summary></key>
+    <key name="active-only" type="b"><default>false</default><summary>Only display active sessions</summary></key>
+    <key name="max-sessions" type="i"><default>6</default><range min="1" max="12"/><summary>Maximum session rows</summary></key>
+    <key name="enter-to-send" type="b"><default>true</default><summary>Enter sends messages; when disabled use Ctrl+Enter</summary></key>
+    <key name="show-mini" type="b"><default>true</default><summary>Show Mini chat tab</summary></key>
+    <key name="show-usage" type="b"><default>true</default><summary>Show account usage tab</summary></key>
+    <key name="mini-height" type="i"><default>220</default><range min="140" max="380"/><summary>Mini response height in pixels</summary></key>
+    <key name="mini-text-size" type="i"><default>13</default><range min="11" max="18"/><summary>Mini response font size</summary></key>
+    <key name="working-directory" type="s"><default>''</default><summary>Working folder for dedicated Mini chat</summary></key>
+  </schema>
+</schemalist>

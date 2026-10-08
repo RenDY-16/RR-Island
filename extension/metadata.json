@@ -1,0 +1,13 @@
+{
+  "uuid": "codex-island@rendy.local",
+  "name": "RR-Island",
+  "description": "Local Codex activity and Mini chat in the RR-Island OLED GNOME panel.",
+  "shell-version": [
+    "50"
+  ],
+  "session-modes": [
+    "user"
+  ],
+  "settings-schema": "org.gnome.shell.extensions.codex-island",
+  "version": 10
+}
