@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none';">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>RR-Island</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="brand"><div class="brand-mark">RR</div><div><strong>RR-Island</strong><small>Codex companion</small></div></div>
+      <nav aria-label="Navigasi utama">
+        <button class="nav-item active" data-page="activity"><span class="nav-icon">◉</span> Aktivitas</button>
+        <button class="nav-item" data-page="mini"><span class="nav-icon">⌁</span> Mini chat</button>
+        <button class="nav-item" data-page="usage"><span class="nav-icon">▤</span> Usage</button>
+      </nav>
+      <div class="sidebar-bottom"><button class="nav-item" data-page="settings"><span class="nav-icon">⚙</span> Pengaturan</button><div class="sidebar-note">Lokal di perangkatmu<br>Tanpa API key tambahan</div></div>
+    </aside>
+    <main class="main">
+      <header class="topbar"><div><div class="eyebrow">PERSONAL CODEX COMPANION</div><h1 id="page-title">Aktivitas</h1></div><div class="top-actions"><span id="connection" class="connection"><i></i><span>Menyambung…</span></span><button id="reconnect" class="quiet-button">Sambungkan</button></div></header>
+      <section id="page-activity" class="page active-page">
+        <div class="welcome-card">
+          <div class="welcome-copy"><div class="eyebrow">CODEx · STATUS LOKAL</div><h2 id="activity-title">Siap menemani sesi Codex.</h2><p id="activity-description">RR-Island menampilkan aktivitas dari hook lokal yang kamu aktifkan.</p><button class="primary" data-page="mini">Buka Mini chat <span>↗</span></button></div>
+          <div class="pet" id="pet" aria-label="Pet Rakit"></div>
+          <div class="glow"></div>
+        </div>
+        <div class="section-heading"><div><h2>Sesi Codex</h2><p>Status terbaru dari perangkat ini</p></div><button id="refresh-status" class="quiet-button">Perbarui</button></div>
+        <div id="session-list" class="session-list"></div>
+        <div id="no-hooks" class="hint-card hidden"><div class="hint-icon">✳</div><div><strong>Aktivitas belum diaktifkan</strong><p>Aktifkan hook di Pengaturan untuk melihat status sesi berjalan. Hook tidak menyimpan isi prompt atau jawaban.</p></div><button class="secondary" data-page="settings">Atur</button></div>
+      </section>
+      <section id="page-mini" class="page">
+        <div class="mini-layout">
+          <div class="mini-toolbar"><div><span class="eyebrow">CHAT PRIVAT DI PERANGKAT</span><h2 id="chat-title">Mini</h2><p id="chat-subtitle">Pesan diteruskan melalui Codex App Server lokal.</p></div><div class="mini-actions"><button class="secondary" id="new-chat">Chat baru</button><button class="secondary" id="old-chats">Chat lama</button></div></div>
+          <div id="chat-view" class="chat-view"><div id="messages" class="messages"></div><div id="catalog" class="catalog hidden"></div></div>
+          <div class="composer-wrap">
+            <div id="send-note" class="send-note">Chat lama mengikuti izin yang sudah tersimpan di Codex.</div>
+            <textarea id="composer" rows="3" maxlength="8000" placeholder="Tulis pesan untuk Codex… (Enter kirim, Shift+Enter baris baru)"></textarea>
+            <div class="composer-footer"><span id="composer-hint">Draft tersimpan sementara di memori</span><div><button class="secondary hidden" id="stop-turn">Hentikan</button><button class="primary" id="send">Kirim <span>↗</span></button></div></div>
+          </div>
+          <div id="mini-status" class="mini-status">Gunakan Codex CLI yang sudah login.</div>
+        </div>
+      </section>
+      <section id="page-usage" class="page">
+        <div class="page-intro"><span class="eyebrow">AKUN CODEX</span><h2>Batas penggunaan</h2><p>Data diminta hanya saat kamu membuka halaman ini atau menekan Perbarui.</p></div>
+        <div id="usage-cards" class="usage-grid"></div>
+        <div class="usage-footer"><span id="usage-updated">Belum diperbarui di sesi ini.</span><button class="secondary" id="refresh-usage">Perbarui</button></div>
+      </section>
+      <section id="page-settings" class="page">
+        <div class="page-intro"><span class="eyebrow">PREFERENSI</span><h2>Pengaturan RR-Island</h2><p>Pengaturan disimpan lokal di perangkat ini.</p></div>
+        <div class="settings-card"><div class="setting-row"><div><strong>Folder kerja Mini</strong><p>Dipakai saat membuat chat Mini baru.</p></div><button class="secondary" id="choose-folder">Pilih folder</button></div><div class="folder-display" id="folder-display">—</div></div>
+        <div class="settings-card"><div class="setting-row"><div><strong>Kirim dengan Enter</strong><p>Shift+Enter tetap membuat baris baru.</p></div><label class="switch"><input id="enter-send" type="checkbox"><span></span></label></div></div>
+        <div class="settings-card"><div class="setting-row"><div><strong>Pantau aktivitas Codex</strong><p>Menambah hook status milik RR-Island ke hooks.json. Isi prompt dan jawaban tidak disimpan.</p></div><label class="switch"><input id="hooks-enabled" type="checkbox"><span></span></label></div><div class="setting-footnote">Backup sebelum perubahan: <code>~/.codex/rr-island-backups</code>. Mematikan fitur hanya menghapus hook yang bertanda RR-Island.</div></div>
+        <div class="about"><span>RR-Island <b id="version">—</b></span><span>MIT License · Windows & Linux</span></div>
+      </section>
+      <footer class="footer"><span>RR-Island menyimpan status secara lokal.</span><span>Codex tetap memegang kendali izin tool.</span></footer>
+    </main>
+  </div>
+  <script type="module" src="ui.js"></script>
+</body>
+</html>

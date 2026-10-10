@@ -1,14 +1,16 @@
 #!/usr/bin/python3
 """On-demand Codex App Server client: local JSON-lines pipes, no listener/logs."""
-import argparse,json,os,shutil,subprocess,sys,threading,time,selectors,tempfile,fcntl,signal
+import argparse,json,os,shutil,subprocess,sys,threading,time,tempfile,signal,queue
 from pathlib import Path
+from platform_lock import FileLock
+from platform_process import spawn_codex, terminate_process
 class BridgeError(Exception):pass
 class RPCTimeout(BridgeError):pass
 def safe_id(v):return isinstance(v,str) and 0<len(v)<=160 and all(c.isalnum() or c in '-_' for c in v)
 class RPC:
  def __init__(self,binary,timeout,on_event):
   self.timeout=timeout;self.on_event=on_event;self.pending={};self.lock=threading.Lock();self.write_lock=threading.Lock();self.serial=0;self.closed=False
-  self.p=subprocess.Popen([binary,'app-server','--stdio'],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.DEVNULL,start_new_session=True)
+  self.p=spawn_codex(binary,['app-server','--stdio'],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.DEVNULL)
   self.reader=threading.Thread(target=self._read,daemon=True);self.reader.start()
  def write(self,obj):
   with self.write_lock:
@@ -57,17 +59,14 @@ class RPC:
  def close(self):
   self.closed=True
   if self.p.poll() is None:
-   os.killpg(self.p.pid,signal.SIGTERM)
-   try:self.p.wait(timeout=3)
-   except subprocess.TimeoutExpired:os.killpg(self.p.pid,signal.SIGKILL);self.p.wait()
+   terminate_process(self.p)
   self.reader.join(timeout=1);self.p.stdin.close();self.p.stdout.close()
 class Bridge:
  def __init__(self,binary,state_dir,cwd,timeout=25,emit=None):
   self.binary=binary;self.timeout=timeout;self.output_lock=threading.Lock();self.emit=emit or self._emit
   self.state_dir=Path(state_dir);self.state_dir.mkdir(parents=True,exist_ok=True,mode=0o700)
-  self.lease=open(self.state_dir/'mini.lock','a');os.chmod(self.state_dir/'mini.lock',0o600)
-  try:fcntl.flock(self.lease,fcntl.LOCK_EX|fcntl.LOCK_NB)
-  except BlockingIOError:self.lease.close();raise BridgeError('Mini sedang dipakai proses Island lain.') from None
+  try:self.lease=FileLock(self.state_dir/'mini.lock')
+  except BlockingIOError:raise BridgeError('Mini sedang dipakai proses Island lain.') from None
   self.state=self.state_dir/'mini.json';self.cwd=cwd;self.thread_id=None;self.loaded=False;self.busy=False;self.turn_id=None;self.lock=threading.RLock();self.closing=False;self.rpc=None;self.active_thread_id=None;self.active_rpc=None;self.external_token=None;self.external_rpc=None;self.start_settled=None;self.finishing=False;self.finish_worker=None
   try:
    if self.state.exists():
@@ -168,6 +167,13 @@ class Bridge:
   if op=='connect':
    if self.rpc.closed:raise BridgeError('Koneksi Codex terputus.')
    return {'threadId':self.thread_id}
+  if op=='new':
+   with self.lock:
+    if self.busy or self.finishing:raise BridgeError('Tunggu balasan selesai sebelum memulai chat baru.')
+    self.thread_id=None;self.loaded=False
+    try:self.state.unlink(missing_ok=True)
+    except OSError:raise BridgeError('Chat baru belum bisa dimulai; file status Mini tidak dapat diperbarui.') from None
+   return {'threadId':None}
   if op=='usage':
    r=self.rpc.call('account/rateLimits/read');return {k:r.get(k) for k in ['rateLimits','rateLimitsByLimitId']}
   if op=='list':
@@ -271,7 +277,8 @@ class Bridge:
   self.rpc.close();self.lease.close()
 def main():
  parser=argparse.ArgumentParser();parser.add_argument('--codex-binary',default='/usr/lib/chatgpt/resources/codex' if Path('/usr/lib/chatgpt/resources/codex').exists() else shutil.which('codex'))
- parser.add_argument('--state-dir',default=str(Path(os.environ.get('XDG_STATE_HOME',Path.home()/'.local/state'))/'codex-island'))
+ default_state=Path(os.environ.get('XDG_STATE_HOME',Path(os.environ.get('LOCALAPPDATA',Path.home()/'.local/state'))))/'codex-island'
+ parser.add_argument('--state-dir',default=str(default_state))
  parser.add_argument('--cwd',default=str(Path.home()));parser.add_argument('--timeout',type=float,default=25)
  parser.add_argument('--idle-seconds',type=float,default=300)
  args=parser.parse_args();bridge=None
@@ -279,27 +286,40 @@ def main():
  try:
   if not args.codex_binary:raise BridgeError('Binary Codex tidak ditemukan. Buka/install aplikasi Codex.')
   bridge=Bridge(args.codex_binary,args.state_dir,args.cwd,args.timeout);bridge.emit({'event':'ready','threadId':bridge.thread_id})
-  selector=selectors.DefaultSelector();selector.register(sys.stdin,selectors.EVENT_READ);buf=b'';last=time.monotonic();workers=[]
+  inbox=queue.Queue(maxsize=32);last=time.monotonic();workers=[]
+  def read_stdin():
+   buf=b''
+   while True:
+    try:data=os.read(sys.stdin.fileno(),4096)
+    except (OSError,ValueError):data=b''
+    if not data:
+     if buf:inbox.put(buf)
+     inbox.put(None);return
+    buf+=data
+    while b'\n' in buf:
+     line,buf=buf.split(b'\n',1)
+     inbox.put(line+b'\n' if len(line)<=65536 else b'\0')
+    if len(buf)>65536:
+     inbox.put(b'\0');buf=b''
+  threading.Thread(target=read_stdin,daemon=True,name='bridge-stdin').start()
   while True:
    if time.monotonic()-last>args.idle_seconds and not bridge.busy and not any(w.is_alive() for w in workers):
     bridge.close()
     bridge.emit({'event':'connection','state':'idle','text':'Istirahat · tersambung lagi saat dipakai.'})
     bridge=None;break
-   if not selector.select(1):continue
-   data=os.read(sys.stdin.fileno(),4096)
-   if not data:break
-   buf+=data
-   if len(buf)>65536:bridge.emit({'event':'notice','text':'Permintaan terlalu panjang.'});break
-   while b'\n' in buf:
-    line,buf=buf.split(b'\n',1);last=time.monotonic()
-    try:d=json.loads(line)
-    except (ValueError,UnicodeError):bridge.emit({'event':'notice','text':'Permintaan JSON tidak valid.'});continue
-    if not isinstance(d,dict):continue
-    if d.get('op')=='shutdown':return 0
-    workers=[w for w in workers if w.is_alive()]
-    if len(workers)>=4:bridge.emit({'id':d.get('id'),'ok':False,'error':'Terlalu banyak permintaan; tunggu sebentar.'});continue
-    w=threading.Thread(target=bridge.respond,args=(d,),daemon=True);workers.append(w);w.start()
-  selector.close()
+   try:line=inbox.get(timeout=1)
+   except queue.Empty:continue
+   if line is None:break
+   last=time.monotonic()
+   if line==b'\0' or len(line)>65536:
+    bridge.emit({'event':'notice','text':'Permintaan terlalu panjang.'});break
+   try:d=json.loads(line)
+   except (ValueError,UnicodeError):bridge.emit({'event':'notice','text':'Permintaan JSON tidak valid.'});continue
+   if not isinstance(d,dict):continue
+   if d.get('op')=='shutdown':return 0
+   workers=[w for w in workers if w.is_alive()]
+   if len(workers)>=4:bridge.emit({'id':d.get('id'),'ok':False,'error':'Terlalu banyak permintaan; tunggu sebentar.'});continue
+   w=threading.Thread(target=bridge.respond,args=(d,),daemon=True);workers.append(w);w.start()
  except (BridgeError,OSError) as e:
   text=str(e) if isinstance(e,BridgeError) else 'Codex tidak dapat dimulai.';print(json.dumps({'event':'connection','state':'error','text':text}),flush=True);return 1
  finally:

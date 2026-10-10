@@ -15,8 +15,12 @@ concurrency:
 
 jobs:
   tests:
-    name: JavaScript tests and Python syntax
-    runs-on: ubuntu-latest
+    name: Tests and package smoke (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
     steps:
       - name: Check out source
         uses: actions/checkout@v4
@@ -24,15 +28,38 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.x"
+          python-version: "3.12"
 
       - name: Run JavaScript tests
         run: npm test
 
+      - name: Run Python tests
+        run: python -m unittest discover -s tests -p "test_*.py" -v
+
       - name: Check Python syntax
-        run: python -m py_compile bridge.py file_ops.py hook.py install.py restore.py
+        run: python -m py_compile bridge.py file_ops.py hook.py install.py restore.py platform_lock.py platform_process.py
+
+      - name: Build standalone Python helpers
+        run: |
+          python -m pip install pyinstaller
+          python scripts/build_helpers.py
+
+      - name: Smoke package for this operating system
+        run: npx electron-builder --dir
+
+      - name: Install virtual display for Linux smoke test
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y xvfb
+
+      - name: Run packaged application smoke test (Linux)
+        if: runner.os == 'Linux'
+        run: xvfb-run -a dist/linux-unpacked/rr-island --no-sandbox --smoke-test
+
+      - name: Run packaged application smoke test (Windows)
+        if: runner.os == 'Windows'
+        run: ./dist/win-unpacked/RR-Island.exe --smoke-test

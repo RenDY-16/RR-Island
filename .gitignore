@@ -12,6 +12,9 @@ __pycache__/
 *.py[cod]
 node_modules/
 .npm/
+.build-venv/
+build/
+dist/
 
 # Local test runs and runtime data
 work/

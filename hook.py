@@ -1,12 +1,13 @@
 #!/usr/bin/python3
 """Receive status-only Codex events. No network, prompts, or tool arguments."""
-import fcntl
 import json
 import os
+import argparse
 from pathlib import Path
 import sys
 import tempfile
 import time
+from platform_lock import FileLock
 
 STATES = {'SessionStart': 'idle', 'UserPromptSubmit': 'thinking',
           'PreToolUse': 'working', 'PostToolUse': 'working',
@@ -18,17 +19,20 @@ def clean(value, limit=64):
 
 def main():
     try:
+        parser = argparse.ArgumentParser(add_help=False)
+        parser.add_argument('--state-dir')
+        args, _ = parser.parse_known_args()
         payload = json.loads(sys.stdin.read(65537))
         if not isinstance(payload, dict): return
         event = payload.get('hook_event_name')
         if event not in STATES: return
         sid = payload.get('session_id')
         if not isinstance(sid, str) or not sid or len(sid) > 160: return
-        folder = Path(os.environ.get('CODEX_ISLAND_STATE_DIR', str(Path.home()/'.cache/codex-island')))
+        default_state = (Path(os.environ['LOCALAPPDATA'])/'RR-Island'/'state'
+                         if os.environ.get('LOCALAPPDATA') else Path.home()/'.cache/codex-island')
+        folder = Path(args.state_dir or os.environ.get('CODEX_ISLAND_STATE_DIR', default_state))
         folder.mkdir(parents=True, exist_ok=True, mode=0o700)
-        lock_fd = os.open(folder/'status.lock', os.O_CREAT | os.O_RDWR, 0o600)
-        with os.fdopen(lock_fd, 'w') as lock:
-            fcntl.flock(lock, fcntl.LOCK_EX)
+        with FileLock(folder/'status.lock', blocking=True):
             target = folder/'status.json'
             try: data = json.loads(target.read_text())
             except (OSError, ValueError): data = {}

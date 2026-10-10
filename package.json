@@ -1,1 +1,67 @@
-{"type":"module","scripts":{"test":"node --test tests/*.test.mjs"}}
+{
+  "name": "rr-island",
+  "version": "1.0.0",
+  "author": "RenDY-16",
+  "description": "A local Codex companion for Windows and Linux",
+  "license": "MIT",
+  "type": "module",
+  "main": "electron/main.cjs",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "test:python": "python -m unittest discover -s tests -p 'test_*.py' -v",
+    "start": "electron .",
+    "build:helpers": "python scripts/build_helpers.py",
+    "package:win": "npm run build:helpers && electron-builder --win nsis",
+    "package:linux": "npm run build:helpers && electron-builder --linux AppImage"
+  },
+  "devDependencies": {
+    "electron": "^44.7.0",
+    "electron-builder": "26.15.3"
+  },
+  "build": {
+    "appId": "com.rendy.rrisland",
+    "productName": "RR-Island",
+    "asar": true,
+    "files": [
+      "electron/**/*",
+      "extension/model.js",
+      "extension/mini-model.js",
+      "extension/pet-model.js",
+      "extension/assets/rakit.png",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "dist/bin",
+        "to": "bin",
+        "filter": [
+          "rr-island-bridge*",
+          "rr-island-hook*"
+        ]
+      }
+    ],
+    "artifactName": "${productName}-${version}-${arch}.${ext}",
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "icon": "build/icon.svg"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowElevation": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "RR-Island"
+    },
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "category": "Utility",
+      "icon": "build/icon.svg"
+    }
+  }
+}
