@@ -35,10 +35,10 @@ jobs:
       - run: python scripts/build_helpers.py
       - name: Build Windows installer
         if: runner.os == 'Windows'
-        run: npx electron-builder --win nsis
+        run: npx electron-builder --win nsis --publish never
       - name: Build Linux AppImage
         if: runner.os == 'Linux'
-        run: npx electron-builder --linux AppImage
+        run: npx electron-builder --linux AppImage --publish never
       - uses: actions/upload-artifact@v4
         if: runner.os == 'Windows'
         with:

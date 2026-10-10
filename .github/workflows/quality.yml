@@ -50,7 +50,7 @@ jobs:
           python scripts/build_helpers.py
 
       - name: Smoke package for this operating system
-        run: npx electron-builder --dir
+        run: npx electron-builder --dir --publish never
 
       - name: Install virtual display for Linux smoke test
         if: runner.os == 'Linux'
@@ -66,7 +66,7 @@ jobs:
 
       - name: Build Windows installer
         if: runner.os == 'Windows'
-        run: npx electron-builder --win nsis
+        run: npx electron-builder --win nsis --publish never
 
       - name: Upload Windows installer artifact
         if: runner.os == 'Windows'

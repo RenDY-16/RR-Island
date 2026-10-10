@@ -11,8 +11,8 @@
     "test:python": "python -m unittest discover -s tests -p 'test_*.py' -v",
     "start": "electron .",
     "build:helpers": "python scripts/build_helpers.py",
-    "package:win": "npm run build:helpers && electron-builder --win nsis",
-    "package:linux": "npm run build:helpers && electron-builder --linux AppImage"
+    "package:win": "npm run build:helpers && electron-builder --win nsis --publish never",
+    "package:linux": "npm run build:helpers && electron-builder --linux AppImage --publish never"
   },
   "devDependencies": {
     "electron": "44.7.0",
