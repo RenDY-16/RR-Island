@@ -20,7 +20,11 @@ def spawn_codex(binary, args, **kwargs):
         # by RR-Island; list2cmdline quotes the executable path and argv values.
         command = subprocess.list2cmdline(argv)
         comspec = os.environ.get("COMSPEC", "cmd.exe")
-        proc = subprocess.Popen([comspec, "/d", "/s", "/c", f'"{command}"'], **kwargs)
+        # cmd.exe needs the /c command as raw command-line text. Passing it as
+        # another argv item makes list2cmdline escape the quotes for cmd's
+        # unusual parser, so the .cmd path is no longer invoked correctly.
+        cmdline = f'{subprocess.list2cmdline([comspec])} /d /s /c "{command}"'
+        proc = subprocess.Popen(cmdline, **kwargs)
         proc._rr_island_shell_wrapper = True
         return proc
     return subprocess.Popen(argv, **kwargs)
