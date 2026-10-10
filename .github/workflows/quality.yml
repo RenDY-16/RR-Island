@@ -63,3 +63,15 @@ jobs:
       - name: Run packaged application smoke test (Windows)
         if: runner.os == 'Windows'
         run: ./dist/win-unpacked/RR-Island.exe --smoke-test
+
+      - name: Build Windows installer
+        if: runner.os == 'Windows'
+        run: npx electron-builder --win nsis
+
+      - name: Upload Windows installer artifact
+        if: runner.os == 'Windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: rr-island-windows-x64
+          path: dist/RR-Island-*-x64.exe
+          if-no-files-found: error
